@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MÖLKKY LOGIC</title>
+    <style>
+        /* システム標準フォントを使用（通信量ゼロ・読みやすさ最高） */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+            text-align: center;
+            padding: 20px 10px;
+            margin: 0;
+            -webkit-text-size-adjust: 100%;
+            /* iPadでのバウンス防止 */
+            overscroll-behavior-y: none;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: 0.05em;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            display: inline-block;
+            position: relative;
+        }
+        
+        input[type="number"] {
+            font-family: inherit;
+            font-size: 42px;
+            font-weight: 700;
+            width: 120px;
+            text-align: center;
+            border: none;
+            border-bottom: 3px solid #000;
+            border-radius: 0;
+            padding: 5px;
+            background: transparent;
+            color: #000;
+            outline: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        button:active { opacity: 0.6; }
+
+        .btn-black { background: #000; color: #fff; border: 2px solid #000; }
+        .btn-outline { background: #fff; color: #000; border: 2px solid #000; }
+
+        .skittles-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 340px;
+            margin: 0 auto 30px auto;
+        }
+
+        .pin {
+            aspect-ratio: 1;
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: 700;
+            color: #000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: all 0.1s;
+        }
+
+        .pin.must {
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
+            position: relative;
+        }
+        .pin.must::after {
+            content: "●";
+            position: absolute;
+            font-size: 8px;
+            top: 4px;
+            right: 50%;
+            transform: translateX(50%);
+        }
+
+        .pin.exclude {
+            background-color: #f0f0f0;
+            color: #ccc;
+            border-color: #ddd;
+            text-decoration: line-through;
+        }
+
+        #result-area {
+            text-align: left;
+            max-width: 340px;
+            margin: 0 auto;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+            padding-bottom: 50px;
+            min-height: 100px;
+        }
+        
+        .route-card {
+            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .route-steps {
+            font-size: 20px;
+            font-weight: 700;
+            color: #000;
+            letter-spacing: -0.5px;
+        }
+        
+        .route-desc {
+            font-size: 12px;
+            font-weight: 600;
+            background: #000;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .guide-text { font-size: 11px; color: #666; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>MÖLKKY LOGIC</h1>
+    
+    <div class="input-group">
+        <input type="number" id="remaining" value="38" oninput="calculate()">
+    </div>
+    
+    <div class="controls">
+        <button class="btn-outline" onclick="resetPins()">条件クリア</button>
+        <button class="btn-black" onclick="calculate()">再計算</button>
+    </div>
+
+    <p class="guide-text">番号タップ：黒(必須) → グレー(除外) → 白(戻る)</p>
+    
+    <div class="skittles-grid" id="pins-container"></div>
+    <div id="result-area"></div>
+
+    <script>
+        let pinStates = Array(13).fill(0); 
+        const container = document.getElementById('pins-container');
+        let pinElements = []; 
+
+        for (let i = 1; i <= 12; i++) {
+            let btn = document.createElement('div');
+            btn.className = 'pin'; 
+            btn.innerText = i;
+            btn.onclick = () => togglePin(i, btn);
+            container.appendChild(btn);
+            pinElements[i] = btn;
+        }
+
+        function resetPins() {
+            for(let i=1; i<=12; i++) {
+                pinStates[i] = 0;
+                pinElements[i].className = 'pin'; 
+            }
+            calculate();
+        }
+
+        function togglePin(num, btnElement) {
+            pinStates[num] = (pinStates[num] + 1) % 3;
+            btnElement.classList.remove('must', 'exclude');
+            if (pinStates[num] === 1) btnElement.classList.add('must');
+            if (pinStates[num] === 2) btnElement.classList.add('exclude');
+            calculate();
+        }
+
+        function calculate() {
+            const remaining = parseInt(document.getElementById('remaining').value);
+            const resultArea = document.getElementById('result-area');
+            
+            if (!remaining || remaining <= 0) {
+                resultArea.innerHTML = "<p style='text-align:center; font-size:12px;'>点数を入力してください</p>";
+                return;
+            }
+            resultArea.innerHTML = "<p style='text-align:center; color:#999; font-size:12px;'>...</p>";
+
+            setTimeout(() => {
+                let routes = [];
+                const maxDepth = (remaining > 36) ? 4 : 3;
+
+                function search(currentScore, history) {
+                    if (history.length >= maxDepth) return;
+                    for (let i = 12; i >= 1; i--) {
+                        if (pinStates[i] === 2) continue;
+                        let nextScore = currentScore - i;
+                        let newHistory = [...history, i];
+                        if (nextScore === 0) routes.push(newHistory);
+                        else if (nextScore > 0) search(nextScore, newHistory);
+                    }
+                }
+                search(remaining, []);
+
+                const mustPins = pinStates.map((s, i) => s === 1 ? i : -1).filter(n => n !== -1);
+                if (mustPins.length > 0) routes = routes.filter(r => mustPins.every(p => r.includes(p)));
+
+                if (routes.length === 0) {
+                    resultArea.innerHTML = "<p style='text-align:center; font-size:14px; font-weight:bold;'>条件に合う手がありません</p>";
+                    return;
+                }
+
+                routes.sort((a, b) => a.length - b.length);
+                let html = "";
+                routes.slice(0, 5).forEach(route => {
+                    html += `<div class="route-card"><div class="route-steps">${route.join(" → ")}</div><div class="route-desc">${route.length}手</div></div>`;
+                });
+                resultArea.innerHTML = html;
+            }, 10);
+        }
+        calculate();
+    </script>
+</body>
+</html>
