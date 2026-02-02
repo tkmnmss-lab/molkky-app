@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>MÖLKKY CALC</title>
+    <title>MÖLKKY TACTICS</title>
     <style>
+        /* iPhone電卓のカラーパレット定義 */
         :root {
-            /* iOS電卓のカラーパレット */
             --ios-bg: #000000;
-            --ios-num-btn: #333333;       /* 数字キーの濃いグレー */
-            --ios-func-btn: #a5a5a5;      /* ACなどの薄いグレー */
-            --ios-action-btn: #ff9f0a;    /* ＝などのオレンジ */
+            --ios-num-btn: #333333;    /* 数字キー（濃いグレー） */
+            --ios-func-btn: #a5a5a5;   /* 機能キー（薄いグレー） */
+            --ios-action-btn: #ff9f0a; /* アクション（オレンジ） */
             --ios-text-white: #ffffff;
             --ios-text-black: #000000;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-            background-color: var(--ios-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", sans-serif;
+            background-color: var(--ios-bg); /* 完全な黒 */
             color: var(--ios-text-white);
             text-align: center;
             padding: 20px 10px;
@@ -28,162 +28,174 @@
             overscroll-behavior-y: none;
         }
 
-        /* 数値表示エリア（電卓のディスプレイ風） */
-        .display-area {
-            text-align: right; /* 電卓らしく右寄せ */
-            padding: 0 20px;
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
             margin-bottom: 20px;
-            max-width: 340px;
-            margin-left: auto;
-            margin-right: auto;
+            letter-spacing: 0.05em;
+            color: var(--ios-text-white);
         }
-
+        
+        .input-group {
+            margin-bottom: 20px;
+            display: inline-block;
+            position: relative;
+        }
+        
         input[type="number"] {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            font-size: 80px; /* 電卓のように巨大に */
-            font-weight: 300; /* 細いフォントでスタイリッシュに */
-            width: 100%;
-            text-align: right;
+            font-family: inherit;
+            font-size: 42px;
+            font-weight: 700;
+            width: 120px;
+            text-align: center;
             border: none;
-            padding: 0;
+            border-bottom: 3px solid var(--ios-num-btn); /* 下線を濃いグレーに */
+            border-radius: 0;
+            padding: 5px;
             background: transparent;
             color: var(--ios-text-white);
             outline: none;
-            caret-color: var(--ios-action-btn); /* カーソルだけオレンジ */
         }
 
-        /* コントロールボタンエリア */
         .controls {
             display: flex;
-            justify-content: space-between; /* 両端に配置 */
+            justify-content: center;
             gap: 15px;
-            max-width: 340px;
-            margin: 0 auto 20px auto;
+            margin-bottom: 30px;
         }
         
+        /* ボタンの形状は「スマート・ダークモード」の角丸を維持 */
         button {
             font-family: inherit;
-            font-size: 18px;
-            font-weight: 500;
-            padding: 15px 0;
-            width: 48%; /* 2つのボタンで幅を分け合う */
-            border-radius: 40px; /* 電卓のボタンの丸み */
+            font-size: 14px;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 30px;
             cursor: pointer;
+            transition: all 0.2s;
             border: none;
-            transition: opacity 0.2s;
             -webkit-tap-highlight-color: transparent;
         }
-        button:active { opacity: 0.7; }
+        button:active { transform: scale(0.95); opacity: 0.8; }
 
-        /* クリアボタン (AC風: 薄いグレーに黒文字) */
-        .btn-clear {
-            background-color: var(--ios-func-btn);
-            color: var(--ios-text-black);
-            font-weight: 600;
-        }
-
-        /* 計算ボタン (=風: オレンジに白文字) */
-        .btn-calc {
-            background-color: var(--ios-action-btn);
+        /* メインボタン（再計算）：オレンジに白文字 */
+        .btn-main {
+            background: var(--ios-action-btn);
             color: var(--ios-text-white);
-            font-weight: 600;
+        }
+        /* サブボタン（クリア）：薄いグレーに黒文字 */
+        .btn-sub {
+            background: var(--ios-func-btn);
+            color: var(--ios-text-black);
         }
 
-        /* スキットル配置エリア */
         .skittles-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px; /* 電卓のキーピッチに近づける */
+            gap: 12px;
             max-width: 340px;
             margin: 0 auto 30px auto;
         }
 
-        /* ピン（数字キー風） */
+        /* ピンの形状は「スマート」のまま、色は電卓風 */
         .pin {
             aspect-ratio: 1;
-            background-color: var(--ios-num-btn); /* 濃いグレー */
-            border-radius: 50%; /* 完全な円 */
-            font-size: 32px;
-            font-weight: 400;
+            background: var(--ios-num-btn); /* 濃いグレー */
+            border: 2px solid var(--ios-num-btn); /* 枠線も同色でソリッドに */
+            border-radius: 50%;
+            font-size: 24px;
+            font-weight: 700;
             color: var(--ios-text-white);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             user-select: none;
-            transition: all 0.2s;
-        }
-        
-        /* タップ時の反応（電卓のように白っぽくなる） */
-        .pin:active {
-            background-color: #737373;
+            transition: all 0.1s;
         }
 
-        /* 必須（オレンジ） */
+        /* 必須（選択中）：オレンジに白文字 */
         .pin.must {
             background-color: var(--ios-action-btn);
             color: var(--ios-text-white);
-            /* 選ばれていることがわかるように、少し白を混ぜて明るく */
-            border: 2px solid #fff; 
+            border-color: var(--ios-action-btn);
+            position: relative;
+        }
+        .pin.must::after {
+            content: "●";
+            position: absolute;
+            font-size: 8px;
+            top: 4px;
+            right: 50%;
+            transform: translateX(50%);
+            color: var(--ios-text-white);
         }
 
-        /* 除外（ブラックアウト） */
+        /* 除外：黒に沈ませる */
         .pin.exclude {
-            background-color: #000; /* 背景に溶け込ませる */
-            color: #333; /* 文字を見えにくく */
-            border: 2px solid #333; /* 枠だけ残す */
-            font-weight: 200;
+            background-color: #000;
+            color: #333;
+            border-color: #000;
+            text-decoration: line-through;
         }
 
-        /* 結果表示エリア */
         #result-area {
             text-align: left;
             max-width: 340px;
             margin: 0 auto;
-            border-top: 1px solid #333;
+            border-top: 1px solid var(--ios-num-btn);
             padding-top: 20px;
             padding-bottom: 50px;
             min-height: 100px;
         }
         
+        /* 結果カード：濃いグレー背景 */
         .route-card {
-            border-bottom: 1px solid #333;
-            padding: 15px 0;
+            background: var(--ios-num-btn);
+            border-radius: 8px; /* スマート版の角丸 */
+            margin-bottom: 10px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
         .route-steps {
-            font-size: 24px;
-            font-weight: 500;
+            font-size: 22px;
+            font-weight: 700;
             color: var(--ios-text-white);
-            letter-spacing: 0.5px;
+            letter-spacing: -0.5px;
         }
         
+        /* 手数表示：薄いグレー背景に黒文字 */
         .route-desc {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--ios-func-btn); /* 薄いグレー */
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ios-text-black);
+            background: var(--ios-func-btn);
+            padding: 4px 10px;
+            border-radius: 4px;
+            white-space: nowrap;
         }
 
-        .guide-text { font-size: 11px; color: #666; margin-bottom: 15px; }
-        
-        /* エラーメッセージ */
-        .error-msg { color: #ff453a; font-weight: bold; } /* iOSの赤 */
+        .guide-text { font-size: 11px; color: #888; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="display-area">
-        <input type="number" id="remaining" value="50" min="1" max="50" oninput="calculate()" placeholder="0">
+    <h1>MÖLKKY TACTICS</h1>
+    
+    <div class="input-group">
+        <input type="number" id="remaining" value="50" min="1" max="50" oninput="calculate()">
     </div>
     
     <div class="controls">
-        <button class="btn-clear" onclick="resetPins()">C</button>
-        <button class="btn-calc" onclick="calculate()">Calc</button>
+        <button class="btn-sub" onclick="resetPins()">条件クリア</button>
+        <button class="btn-main" onclick="calculate()">再計算</button>
     </div>
 
+    <p class="guide-text">番号タップ：オレンジ(必須) → 黒(除外) → グレー(戻る)</p>
+    
     <div class="skittles-grid" id="pins-container"></div>
     <div id="result-area"></div>
 
@@ -222,15 +234,15 @@
             const resultArea = document.getElementById('result-area');
             
             if (remaining > 50) {
-                resultArea.innerHTML = "<p class='error-msg' style='text-align:center;'>50点オーバー</p>";
+                resultArea.innerHTML = "<p style='text-align:center; font-size:14px; font-weight:bold; color:#ff453a;'>50点を超えています</p>";
                 return;
             }
             
             if (!remaining || remaining <= 0) {
-                resultArea.innerHTML = "";
+                resultArea.innerHTML = "<p style='text-align:center; font-size:12px; color:#888;'>点数を入力してください</p>";
                 return;
             }
-            resultArea.innerHTML = "<p style='text-align:center; color:#555;'>...</p>";
+            resultArea.innerHTML = "<p style='text-align:center; color:#666; font-size:12px;'>...</p>";
 
             setTimeout(() => {
                 let routes = [];
@@ -259,7 +271,7 @@
                 if (mustPins.length > 0) routes = routes.filter(r => mustPins.every(p => r.includes(p)));
 
                 if (routes.length === 0) {
-                    resultArea.innerHTML = "<p style='text-align:center; color:#666;'>候補なし</p>";
+                    resultArea.innerHTML = "<p style='text-align:center; font-size:14px; font-weight:bold; color:#888;'>条件に合う手がありません</p>";
                     return;
                 }
 
