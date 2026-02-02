@@ -5,13 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>MÖLKKY DARK</title>
+    <title>MÖLKKY TACTICS</title>
     <style>
+        /* iPhone電卓のカラーパレット定義 */
+        :root {
+            --ios-bg: #000000;
+            --ios-num-btn: #333333;    /* 数字キー（濃いグレー） */
+            --ios-func-btn: #a5a5a5;   /* 機能キー（薄いグレー） */
+            --ios-action-btn: #ff9f0a; /* アクション（オレンジ） */
+            --ios-text-white: #ffffff;
+            --ios-text-black: #000000;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", sans-serif;
-            /* 真っ黒ではなく、目に優しい濃いグレー */
-            background-color: #1a1a1a; 
-            color: #f0f0f0; /* 文字も少し輝度を落とす */
+            background-color: var(--ios-bg); /* 完全な黒 */
+            color: var(--ios-text-white);
             text-align: center;
             padding: 20px 10px;
             margin: 0;
@@ -24,7 +33,7 @@
             font-weight: 600;
             margin-bottom: 20px;
             letter-spacing: 0.05em;
-            color: #e0e0e0;
+            color: var(--ios-text-white);
         }
         
         .input-group {
@@ -40,11 +49,11 @@
             width: 120px;
             text-align: center;
             border: none;
-            border-bottom: 3px solid #888; /* 下線を少し控えめに */
+            border-bottom: 3px solid var(--ios-num-btn); /* 下線を濃いグレーに */
             border-radius: 0;
             padding: 5px;
             background: transparent;
-            color: #fff;
+            color: var(--ios-text-white);
             outline: none;
         }
 
@@ -55,12 +64,13 @@
             margin-bottom: 30px;
         }
         
+        /* ボタンの形状は「スマート・ダークモード」の角丸を維持 */
         button {
             font-family: inherit;
             font-size: 14px;
             font-weight: 600;
             padding: 12px 24px;
-            border-radius: 30px; /* 角を丸くして柔らかい印象に */
+            border-radius: 30px;
             cursor: pointer;
             transition: all 0.2s;
             border: none;
@@ -68,10 +78,16 @@
         }
         button:active { transform: scale(0.95); opacity: 0.8; }
 
-        /* メインボタン：白に近いグレー */
-        .btn-main { background: #e0e0e0; color: #1a1a1a; }
-        /* サブボタン：枠線のみ */
-        .btn-sub { background: transparent; color: #aaa; border: 2px solid #555; }
+        /* メインボタン（再計算）：オレンジに白文字 */
+        .btn-main {
+            background: var(--ios-action-btn);
+            color: var(--ios-text-white);
+        }
+        /* サブボタン（クリア）：薄いグレーに黒文字 */
+        .btn-sub {
+            background: var(--ios-func-btn);
+            color: var(--ios-text-black);
+        }
 
         .skittles-grid {
             display: grid;
@@ -81,14 +97,15 @@
             margin: 0 auto 30px auto;
         }
 
+        /* ピンの形状は「スマート」のまま、色は電卓風 */
         .pin {
             aspect-ratio: 1;
-            background: #252525; /* 背景を少し明るくして浮き上がらせる */
-            border: 2px solid #444; /* 枠線を目立たなく */
+            background: var(--ios-num-btn); /* 濃いグレー */
+            border: 2px solid var(--ios-num-btn); /* 枠線も同色でソリッドに */
             border-radius: 50%;
             font-size: 24px;
             font-weight: 700;
-            color: #ddd;
+            color: var(--ios-text-white);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -97,12 +114,11 @@
             transition: all 0.1s;
         }
 
-        /* 必須（ハイライト）：木の色 */
+        /* 必須（選択中）：オレンジに白文字 */
         .pin.must {
-            background-color: #d4a373; /* モルックの木の色 */
-            color: #000;
-            border-color: #d4a373;
-            box-shadow: 0 0 10px rgba(212, 163, 115, 0.3);
+            background-color: var(--ios-action-btn);
+            color: var(--ios-text-white);
+            border-color: var(--ios-action-btn);
             position: relative;
         }
         .pin.must::after {
@@ -112,15 +128,14 @@
             top: 4px;
             right: 50%;
             transform: translateX(50%);
-            color: #000;
-            opacity: 0.5;
+            color: var(--ios-text-white);
         }
 
-        /* 除外（沈ませる） */
+        /* 除外：黒に沈ませる */
         .pin.exclude {
-            background-color: #111;
+            background-color: #000;
             color: #333;
-            border-color: #222;
+            border-color: #000;
             text-decoration: line-through;
         }
 
@@ -128,15 +143,16 @@
             text-align: left;
             max-width: 340px;
             margin: 0 auto;
-            border-top: 1px solid #333;
+            border-top: 1px solid var(--ios-num-btn);
             padding-top: 20px;
             padding-bottom: 50px;
             min-height: 100px;
         }
         
+        /* 結果カード：濃いグレー背景 */
         .route-card {
-            background: #252525; /* カード背景 */
-            border-radius: 8px;
+            background: var(--ios-num-btn);
+            border-radius: 8px; /* スマート版の角丸 */
             margin-bottom: 10px;
             padding: 15px 20px;
             display: flex;
@@ -147,18 +163,22 @@
         .route-steps {
             font-size: 22px;
             font-weight: 700;
-            color: #f0f0f0;
+            color: var(--ios-text-white);
             letter-spacing: -0.5px;
         }
         
+        /* 手数表示：薄いグレー背景に黒文字 */
         .route-desc {
             font-size: 13px;
             font-weight: 600;
-            color: #888;
+            color: var(--ios-text-black);
+            background: var(--ios-func-btn);
+            padding: 4px 10px;
+            border-radius: 4px;
             white-space: nowrap;
         }
 
-        .guide-text { font-size: 11px; color: #666; margin-bottom: 15px; }
+        .guide-text { font-size: 11px; color: #888; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -174,7 +194,7 @@
         <button class="btn-main" onclick="calculate()">再計算</button>
     </div>
 
-    <p class="guide-text">番号タップ：木の色(必須) → 暗(除外) → 戻る</p>
+    <p class="guide-text">番号タップ：オレンジ(必須) → 黒(除外) → グレー(戻る)</p>
     
     <div class="skittles-grid" id="pins-container"></div>
     <div id="result-area"></div>
@@ -214,15 +234,15 @@
             const resultArea = document.getElementById('result-area');
             
             if (remaining > 50) {
-                resultArea.innerHTML = "<p style='text-align:center; font-size:14px; font-weight:bold; color:#ff6b6b;'>50点を超えています</p>";
+                resultArea.innerHTML = "<p style='text-align:center; font-size:14px; font-weight:bold; color:#ff453a;'>50点を超えています</p>";
                 return;
             }
             
             if (!remaining || remaining <= 0) {
-                resultArea.innerHTML = "<p style='text-align:center; font-size:12px; color:#666;'>点数を入力してください</p>";
+                resultArea.innerHTML = "<p style='text-align:center; font-size:12px; color:#888;'>点数を入力してください</p>";
                 return;
             }
-            resultArea.innerHTML = "<p style='text-align:center; color:#555; font-size:12px;'>...</p>";
+            resultArea.innerHTML = "<p style='text-align:center; color:#666; font-size:12px;'>...</p>";
 
             setTimeout(() => {
                 let routes = [];
@@ -251,7 +271,7 @@
                 if (mustPins.length > 0) routes = routes.filter(r => mustPins.every(p => r.includes(p)));
 
                 if (routes.length === 0) {
-                    resultArea.innerHTML = "<p style='text-align:center; font-size:14px; font-weight:bold; color:#666;'>条件に合う手がありません</p>";
+                    resultArea.innerHTML = "<p style='text-align:center; font-size:14px; font-weight:bold; color:#888;'>条件に合う手がありません</p>";
                     return;
                 }
 
