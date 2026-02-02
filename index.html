@@ -126,14 +126,14 @@
         
         .route-card {
             border-bottom: 1px solid #eee;
-            padding: 15px 0; /* 余白を少し広げて見やすく */
+            padding: 15px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
         .route-steps {
-            font-size: 22px; /* 少し大きく */
+            font-size: 22px;
             font-weight: 700;
             color: #000;
             letter-spacing: -0.5px;
@@ -146,7 +146,7 @@
             color: #fff;
             padding: 4px 10px;
             border-radius: 4px;
-            white-space: nowrap; /* 折り返し防止 */
+            white-space: nowrap;
         }
 
         .guide-text { font-size: 11px; color: #666; margin-bottom: 10px; }
@@ -157,7 +157,7 @@
     <h1>MÖLKKY LOGIC</h1>
     
     <div class="input-group">
-        <input type="number" id="remaining" value="38" oninput="calculate()">
+        <input type="number" id="remaining" value="50" min="1" max="50" oninput="calculate()">
     </div>
     
     <div class="controls">
@@ -204,6 +204,13 @@
             const remaining = parseInt(document.getElementById('remaining').value);
             const resultArea = document.getElementById('result-area');
             
+            // ルールチェック：50点を超えた場合
+            if (remaining > 50) {
+                // シンプルなメッセージに変更
+                resultArea.innerHTML = "<p style='text-align:center; font-size:14px; font-weight:bold; color:#e00;'>50点を超えています</p>";
+                return;
+            }
+            
             if (!remaining || remaining <= 0) {
                 resultArea.innerHTML = "<p style='text-align:center; font-size:12px;'>点数を入力してください</p>";
                 return;
@@ -212,9 +219,8 @@
 
             setTimeout(() => {
                 let routes = [];
-                const maxDepth = (remaining > 36) ? 4 : 3;
+                const maxDepth = 5; 
 
-                // 小さい数字から順に探索
                 function search(currentScore, history, minVal) {
                     if (history.length >= maxDepth) return;
                     
