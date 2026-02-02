@@ -7,12 +7,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>MÖLKKY TACTICS</title>
     <style>
-        /* iPhone電卓のカラーパレット定義 */
         :root {
             --ios-bg: #000000;
-            --ios-num-btn: #333333;    /* 数字キー */
-            --ios-func-btn: #a5a5a5;   /* 機能キー */
-            --ios-action-btn: #ff9f0a; /* アクション */
+            --ios-num-btn: #333333;
+            --ios-func-btn: #a5a5a5;
+            --ios-action-btn: #ff9f0a;
             --ios-text-white: #ffffff;
             --ios-text-black: #000000;
         }
@@ -28,7 +27,6 @@
             overscroll-behavior-y: none;
         }
 
-        /* ラベル類 */
         .label-area {
             display: flex;
             justify-content: space-between;
@@ -41,12 +39,11 @@
         }
 
         .input-group {
-            margin-bottom: 10px;
+            margin-bottom: 5px; /* 余白を少し詰める */
             display: inline-block;
             position: relative;
         }
         
-        /* 現在の点数入力 */
         input[type="number"] {
             font-family: inherit;
             font-size: 56px;
@@ -62,27 +59,26 @@
             outline: none;
         }
 
-        /* 残り点数の表示エリア */
         #remainder-display {
             font-size: 16px;
-            color: var(--ios-action-btn); /* オレンジ色で強調 */
+            color: var(--ios-action-btn);
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             height: 24px;
         }
 
         .controls {
             display: flex;
-            justify-content: center;
-            gap: 15px;
+            justify-content: center; /* 中央寄せ */
             margin-bottom: 30px;
         }
         
         button {
             font-family: inherit;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
-            padding: 12px 24px;
+            padding: 12px 0;
+            width: 200px; /* 幅を広げて押しやすく */
             border-radius: 30px;
             cursor: pointer;
             transition: all 0.2s;
@@ -91,8 +87,11 @@
         }
         button:active { transform: scale(0.95); opacity: 0.8; }
 
-        .btn-main { background: var(--ios-action-btn); color: var(--ios-text-white); }
-        .btn-sub { background: var(--ios-func-btn); color: var(--ios-text-black); }
+        /* 条件クリアボタン：薄いグレー */
+        .btn-sub {
+            background: var(--ios-func-btn);
+            color: var(--ios-text-black);
+        }
 
         .skittles-grid {
             display: grid;
@@ -195,7 +194,6 @@
     
     <div class="controls">
         <button class="btn-sub" onclick="resetPins()">条件クリア</button>
-        <button class="btn-main" onclick="calculate()">再計算</button>
     </div>
 
     <p class="guide-text">番号タップ：オレンジ(必須) → 黒(除外) → グレー(戻る)</p>
@@ -234,22 +232,18 @@
         }
 
         function calculate() {
-            // 入力された「現在の点数」を取得
             const currentScore = parseInt(document.getElementById('current_score').value);
             const resultArea = document.getElementById('result-area');
             const remainderDisplay = document.getElementById('remainder-display');
             
-            // 入力チェック
             if (isNaN(currentScore)) {
                 resultArea.innerHTML = "<p style='text-align:center; font-size:12px; color:#888;'>点数を入力してください</p>";
                 remainderDisplay.innerText = "";
                 return;
             }
 
-            // ★ここで「50 - 現在の点数」を計算してターゲットにする
             const target = 50 - currentScore;
 
-            // 残り点数の表示更新
             if (target > 0) {
                 remainderDisplay.innerText = `あと ${target} 点`;
             } else if (target === 0) {
@@ -258,7 +252,6 @@
                 remainderDisplay.innerText = "OVER!";
             }
 
-            // ロジック分岐
             if (target < 0) {
                 resultArea.innerHTML = "<p style='text-align:center; font-size:14px; font-weight:bold; color:#ff453a;'>50点を超えています</p>";
                 return;
@@ -275,7 +268,6 @@
                 let routes = [];
                 const maxDepth = 5; 
 
-                // search関数には 計算した 'target' を渡す
                 function search(currentTarget, history, minVal) {
                     if (history.length >= maxDepth) return;
                     
@@ -317,7 +309,6 @@
             }, 10);
         }
         
-        // 初回計算
         calculate();
     </script>
 </body>
