@@ -11,7 +11,7 @@
             --ios-bg: #000000;
             --ios-num-btn: #333333;
             --ios-func-btn: #a5a5a5;
-            --ios-action-btn: #ff9f0a;
+            --ios-action-btn: #ff9f0a; /* オレンジ */
             --ios-text-white: #ffffff;
             --ios-text-black: #000000;
         }
@@ -81,15 +81,22 @@
             width: 200px;
             border-radius: 30px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s; /* 色の変化を滑らかに */
             border: none;
             -webkit-tap-highlight-color: transparent;
         }
         button:active { transform: scale(0.95); opacity: 0.8; }
 
-        .btn-sub {
+        /* 通常時のボタン：薄いグレー */
+        .btn-default {
             background: var(--ios-func-btn);
             color: var(--ios-text-black);
+        }
+
+        /* アクティブ時（ピン選択中）：オレンジ */
+        .btn-active {
+            background: var(--ios-action-btn);
+            color: var(--ios-text-white);
         }
 
         .skittles-grid {
@@ -192,7 +199,7 @@
     <div id="remainder-display">あと 12 点</div>
     
     <div class="controls">
-        <button class="btn-sub" onclick="resetPins()">条件クリア</button>
+        <button id="clear-btn" class="btn-default" onclick="resetPins()">条件クリア</button>
     </div>
 
     <p class="guide-text">番号タップ：オレンジ(必須) → 黒(除外) → グレー(戻る)</p>
@@ -204,6 +211,7 @@
         let pinStates = Array(13).fill(0); 
         const container = document.getElementById('pins-container');
         let pinElements = []; 
+        const clearBtn = document.getElementById('clear-btn'); // ボタンを取得
 
         for (let i = 1; i <= 12; i++) {
             let btn = document.createElement('div');
@@ -214,11 +222,24 @@
             pinElements[i] = btn;
         }
 
+        // ボタンの色を更新する関数
+        function updateClearBtnState() {
+            // 1つでも0以外（選択or除外）があればtrue
+            const isModified = pinStates.some(state => state !== 0);
+            
+            if (isModified) {
+                clearBtn.className = 'btn-active'; // オレンジ色へ
+            } else {
+                clearBtn.className = 'btn-default'; // グレーへ戻す
+            }
+        }
+
         function resetPins() {
             for(let i=1; i<=12; i++) {
                 pinStates[i] = 0;
                 pinElements[i].className = 'pin'; 
             }
+            updateClearBtnState(); // 色を戻す
             calculate();
         }
 
@@ -227,6 +248,8 @@
             btnElement.classList.remove('must', 'exclude');
             if (pinStates[num] === 1) btnElement.classList.add('must');
             if (pinStates[num] === 2) btnElement.classList.add('exclude');
+            
+            updateClearBtnState(); // 色を更新チェック
             calculate();
         }
 
