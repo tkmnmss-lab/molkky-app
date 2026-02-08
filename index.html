@@ -151,7 +151,7 @@
             text-align: center;
             font-size: 13px;
             color: #888;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             font-weight: 500;
         }
         
@@ -185,6 +185,15 @@
         .route-desc.best {
             background: var(--ios-action-btn);
             color: var(--ios-text-white);
+        }
+
+        /* 次の手数のカウント表示（テキスト） */
+        .next-routes-info {
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+            margin-top: 20px;
+            padding-bottom: 20px;
         }
 
         .guide-text { font-size: 11px; color: #888; margin-bottom: 15px; }
@@ -318,19 +327,30 @@
                     return;
                 }
 
-                routes.sort((a, b) => a.length - b.length);
+                // ソート（短い順 ＞ 大きい数字順）
+                routes.sort((a, b) => {
+                    if (a.length !== b.length) return a.length - b.length;
+                    const maxA = Math.max(...a);
+                    const maxB = Math.max(...b);
+                    return maxB - maxA; 
+                });
+
+                // 最短手数を特定
                 const minSteps = routes[0].length;
                 
+                // 最短手数のルート（全てカード表示用）
                 const bestRoutes = routes.filter(r => r.length === minSteps);
-                const totalPatterns = bestRoutes.length;
                 
-                let html = `<div class="result-count">最短 ${minSteps}手 (${totalPatterns}通り)</div>`;
+                // 次の手数（+1手）のルート数をカウント
+                const nextRoutes = routes.filter(r => r.length === minSteps + 1);
+                const nextRoutesCount = nextRoutes.length;
                 
+                let html = `<div class="result-count">最短 ${minSteps}手 (${bestRoutes.length}通り)</div>`;
+                
+                // 1. 最短ルートを全てカード表示 (省略なし)
                 bestRoutes.forEach(route => {
-                    // ★ここを変更: 配列を反転(reverse)させてから結合
-                    // [1, 11] -> [11, 1] になります
+                    // 大きい順に並べ替え
                     const displayRoute = [...route].reverse().join(" + ");
-                    
                     html += `
                         <div class="route-card">
                             <div class="route-steps">${displayRoute}</div>
@@ -338,6 +358,12 @@
                         </div>
                     `;
                 });
+
+                // 2. 次の手数の情報をテキストのみで表示
+                if (nextRoutesCount > 0) {
+                    html += `<div class="next-routes-info">その他: ${minSteps + 1}手のルートが ${nextRoutesCount}通りあります</div>`;
+                }
+
                 resultArea.innerHTML = html;
             }, 10);
         }
