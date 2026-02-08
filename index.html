@@ -11,7 +11,7 @@
             --ios-bg: #000000;
             --ios-num-btn: #333333;
             --ios-func-btn: #a5a5a5;
-            --ios-action-btn: #ff9f0a; /* オレンジ */
+            --ios-action-btn: #ff9f0a;
             --ios-text-white: #ffffff;
             --ios-text-black: #000000;
         }
@@ -81,23 +81,14 @@
             width: 200px;
             border-radius: 30px;
             cursor: pointer;
-            transition: all 0.2s; /* 色の変化を滑らかに */
+            transition: all 0.2s;
             border: none;
             -webkit-tap-highlight-color: transparent;
         }
         button:active { transform: scale(0.95); opacity: 0.8; }
 
-        /* 通常時のボタン：薄いグレー */
-        .btn-default {
-            background: var(--ios-func-btn);
-            color: var(--ios-text-black);
-        }
-
-        /* アクティブ時（ピン選択中）：オレンジ */
-        .btn-active {
-            background: var(--ios-action-btn);
-            color: var(--ios-text-white);
-        }
+        .btn-default { background: var(--ios-func-btn); color: var(--ios-text-black); }
+        .btn-active { background: var(--ios-action-btn); color: var(--ios-text-white); }
 
         .skittles-grid {
             display: grid;
@@ -155,6 +146,14 @@
             padding-bottom: 50px;
             min-height: 100px;
         }
+
+        .result-count {
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
         
         .route-card {
             background: var(--ios-num-btn);
@@ -181,6 +180,11 @@
             padding: 4px 10px;
             border-radius: 4px;
             white-space: nowrap;
+        }
+        
+        .route-desc.best {
+            background: var(--ios-action-btn);
+            color: var(--ios-text-white);
         }
 
         .guide-text { font-size: 11px; color: #888; margin-bottom: 15px; }
@@ -211,7 +215,7 @@
         let pinStates = Array(13).fill(0); 
         const container = document.getElementById('pins-container');
         let pinElements = []; 
-        const clearBtn = document.getElementById('clear-btn'); // ボタンを取得
+        const clearBtn = document.getElementById('clear-btn');
 
         for (let i = 1; i <= 12; i++) {
             let btn = document.createElement('div');
@@ -222,15 +226,12 @@
             pinElements[i] = btn;
         }
 
-        // ボタンの色を更新する関数
         function updateClearBtnState() {
-            // 1つでも0以外（選択or除外）があればtrue
             const isModified = pinStates.some(state => state !== 0);
-            
             if (isModified) {
-                clearBtn.className = 'btn-active'; // オレンジ色へ
+                clearBtn.className = 'btn-active';
             } else {
-                clearBtn.className = 'btn-default'; // グレーへ戻す
+                clearBtn.className = 'btn-default';
             }
         }
 
@@ -239,7 +240,7 @@
                 pinStates[i] = 0;
                 pinElements[i].className = 'pin'; 
             }
-            updateClearBtnState(); // 色を戻す
+            updateClearBtnState();
             calculate();
         }
 
@@ -249,7 +250,7 @@
             if (pinStates[num] === 1) btnElement.classList.add('must');
             if (pinStates[num] === 2) btnElement.classList.add('exclude');
             
-            updateClearBtnState(); // 色を更新チェック
+            updateClearBtnState();
             calculate();
         }
 
@@ -318,12 +319,22 @@
                 }
 
                 routes.sort((a, b) => a.length - b.length);
-                let html = "";
-                routes.slice(0, 5).forEach(route => {
+                const minSteps = routes[0].length;
+                
+                const bestRoutes = routes.filter(r => r.length === minSteps);
+                const totalPatterns = bestRoutes.length;
+                
+                let html = `<div class="result-count">最短 ${minSteps}手 (${totalPatterns}通り)</div>`;
+                
+                bestRoutes.forEach(route => {
+                    // ★ここを変更: 配列を反転(reverse)させてから結合
+                    // [1, 11] -> [11, 1] になります
+                    const displayRoute = [...route].reverse().join(" + ");
+                    
                     html += `
                         <div class="route-card">
-                            <div class="route-steps">${route.join(" + ")}</div>
-                            <div class="route-desc">${route.length}手</div>
+                            <div class="route-steps">${displayRoute}</div>
+                            <div class="route-desc best">${route.length}手</div>
                         </div>
                     `;
                 });
